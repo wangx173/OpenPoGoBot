@@ -50,7 +50,7 @@ class PokemonGoBot(object):
 
     def work_on_cell(self, map_cells, position, include_fort_on_path):
         # Check if session token has expired
-        self.check_session(location)
+        self.check_session(position)
 
         self._remove_ignored_pokemon(map_cells)
 
@@ -142,6 +142,8 @@ class PokemonGoBot(object):
 
     def check_session(self, position):
         # Check session expiry
+        # We will need to fix protected-access. Unfortunately currently no other way to get this information
+        #pylint: disable=protected-access
         if self.api._auth_provider and self.api._auth_provider._ticket_expire:
             remaining_time = self.api._auth_provider._ticket_expire/1000 - time.time()
 
@@ -153,15 +155,9 @@ class PokemonGoBot(object):
 
     def login(self):
         logger.log('[#] Attempting login to Pokemon Go.', 'white')
-        self.api._auth_token = None
-        self.api._auth_provider = None
-        self.api._api_endpoint = None
-        self.api.set_position(*self.position[0:2])
+        self.api.set_position(*self.position)
 
-        while not self.api.login(self.config.auth_service,
-                               str(self.config.username),
-                               str(self.config.password)):
-
+        while not self.api.login(self.config.auth_service, str(self.config.username), str(self.config.password)):
             logger.log('[X] Login Error, server busy', 'red')
             logger.log('[X] Waiting 10 seconds to try again', 'red')
             time.sleep(10)
