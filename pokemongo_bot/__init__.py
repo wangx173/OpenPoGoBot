@@ -128,27 +128,24 @@ class PokemonGoBot(object):
 
     def _remove_ignored_pokemon(self, map_cells):
         if self.process_ignored_pokemon:
-            try:
-                for cell in map_cells:
-                    for pokemon in cell['wild_pokemons'][:]:
+            for cell in map_cells:
+                wild_pokemons = cell.get('wild_pokemons')
+                catchable_pokemons = cell.get('catchable_pokemons')
+                if wild_pokemons is not None:
+                    for pokemon in wild_pokemons[:]:
                         pokemon_id = pokemon['pokemon_data']['pokemon_id']
                         pokemon_name = [x for x in self.pokemon_list if int(x.get('Number')) == pokemon_id][0]['Name']
 
                         if pokemon_name in self.ignores:
-                            cell['wild_pokemons'].remove(pokemon)
-            except KeyError:
-                pass
-
-            try:
-                for cell in map_cells:
-                    for pokemon in cell['catchable_pokemons'][:]:
+                            wild_pokemons.remove(pokemon)
+                if catchable_pokemons is not None:
+                    for pokemon in catchable_pokemons[:]:
                         pokemon_id = pokemon['pokemon_id']
                         pokemon_name = [x for x in self.pokemon_list if int(x.get('Number')) == pokemon_id][0]['Name']
 
                         if pokemon_name in self.ignores:
-                            cell['catchable_pokemons'].remove(pokemon)
-            except KeyError:
-                pass
+                            catchable_pokemons.remove(pokemon)
+
 
     def _work_on_catchable_pokemon(self, map_cells):
         for cell in map_cells:
