@@ -330,7 +330,7 @@ class PokemonGoBot(object):
                     logger.log('')
 
                     return
-            except FileNotFoundError:
+            except IOError:
                 if not self.config.location:
                     sys.exit("No cached Location. Please specify initial location.")
                 else:
