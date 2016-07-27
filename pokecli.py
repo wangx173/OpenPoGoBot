@@ -183,7 +183,7 @@ def init_config():
             for key in config.__dict__:
                 if config.__dict__.get(key) is None and loaded_config.get(key) is not None:
                     config.__dict__[key] = loaded_config.get(key)
-        except Exception:
+        except json.JSONDecodeError:
             logging.error("Error loading %s", config.json)
             return None
 
