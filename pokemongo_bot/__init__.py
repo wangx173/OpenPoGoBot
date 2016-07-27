@@ -397,7 +397,8 @@ class PokemonGoBot(object):
         if inventory_items is None:
             return
         for item in inventory_items:
-            # print('item {}'.format(item))
+            if item.get("inventory_item_data", {}).get("player_stats") is None:
+                continue
             player_stats = item['inventory_item_data']['player_stats']
 
             if 'experience' not in player_stats:
