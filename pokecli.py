@@ -31,6 +31,8 @@ from getpass import getpass
 from builtins import input
 import json
 import argparse
+import time
+import random 
 import ssl
 import logging
 import sys
@@ -234,6 +236,24 @@ def main():
 
     except KeyboardInterrupt:
         logger.log('[x] Exiting PokemonGo Bot', 'red')
+        # TODO Add number of pokemon catched, pokestops visited, highest CP
+        # pokemon catched, etc.
+
+    except RuntimeError as e:
+        # softban encountered
+        logger.log("[x] " + str(e), 'red')
+        # restart the program
+        sleep_time = random.randint(3600, 7200)
+        logger.log("[x] softban error, restart the bot in " + str(sleep_time) +" seconds", "yellow")
+        time.sleep(sleep_time)
+        main()
+
+    except Exception as e:
+        sleep_time = random.randint(85, 600)
+        logger.log("[x] " + str(e), 'red')
+        logger.log("[x] Unexpected error, restart the bot in " + str(sleep_time) +" seconds", "yellow")
+        time.sleep(sleep_time)
+        main()
 
 
 if __name__ == '__main__':
