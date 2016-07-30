@@ -11,6 +11,7 @@ import time
 import threading
 
 import googlemaps
+from googlemaps.exceptions import ApiError
 
 from pokemongo_bot import logger, cell_workers, human_behaviour, item_list, stepper
 from pokemongo_bot.event_manager import manager
@@ -250,13 +251,10 @@ class PokemonGoBot(object):
         logger.log('[+] Login to Pokemon Go successful.', 'green')
         self.api.get_player()
         response_dict = self.api.call()
-        try:
-            player = response_dict['responses']['GET_PLAYER']['player_data']
-            self.print_player_data(player)
-            self.get_player_info()
-        except TypeError:
-            logger.log("[X] Unable to parse player object from API", 'red')
-            logger.log("Forced Exit!", 'red')
+
+        player = response_dict['responses']['GET_PLAYER']['player_data']
+        self.print_player_data(player)
+        self.get_player_info()
 
 
     def _setup_api(self):
@@ -279,18 +277,11 @@ class PokemonGoBot(object):
 
         response_dict = self.api.call()
         if response_dict is not None:
-            # print('Response dictionary: \n\r{}'.format(json.dumps(response_dict, indent=2)))
-            try:
-                player = response_dict['responses']['GET_PLAYER']['player_data']
-                self.print_player_data(player)
-                self.get_player_info()
-            except TypeError:
-                logger.log("[X] Unable to parse player object from API: %s", 'red')
-                logger.log("Forced Exit!", 'red')
+        # print('Response dictionary: \n\r{}'.format(json.dumps(response_dict, indent=2)))
 
-        # Testing
-        # self.drop_item(Item.ITEM_POTION.value,1)
-        # exit(0)
+            player = response_dict['responses']['GET_PLAYER']['player_data']
+            self.print_player_data(player)
+            self.get_player_info()
 
         if self.config.initial_transfer:
             worker = InitialTransferWorker(self)
@@ -422,6 +413,28 @@ class PokemonGoBot(object):
         logger.log(u'[x] Address found: {}'.format(self.config.location))
 
     def _get_pos_by_name(self, location_name):
+        if location_name.count(',') == 1:
+            try:
+                logger.log("[x] Fetching altitude from google")
+                parts = location_name.split(',')
+
+                pos_lat = float(parts[0])
+                pos_lng = float(parts[1])
+
+                # we need to ask google for the altitude
+                gmaps = googlemaps.Client(key=self.config.gmapkey)
+                response = gmaps.elevation((pos_lat, pos_lng))
+
+                if len(response) and "elevation" in response[0]:
+                    return pos_lat, pos_lng, response[0]["elevation"]
+                else:
+                    raise ValueError
+            except ApiError:
+                logger.log("[x] Could not fetch altitude from google. Trying geolocator.")
+            except ValueError:
+                logger.log("[x] Location was not Lat/Lng.")
+
+        # Fallback to geolocation if no Lat/Lng can be found
         geolocator = GoogleV3(api_key=self.config.gmapkey)
         loc = geolocator.geocode(location_name, timeout=10)
 
