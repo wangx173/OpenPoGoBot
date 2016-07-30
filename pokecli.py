@@ -256,7 +256,7 @@ def main():
         main()
 
     except Exception as e:
-        sleep_time = random.randint(85, 600)
+        sleep_time = random.randint(10, 120)
         logger.log("[x] " + str(e), 'red')
         logger.log("[x] Unexpected error, restart the bot in " + str(sleep_time) +" seconds", "yellow")
         time.sleep(sleep_time)
