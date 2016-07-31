@@ -24,3 +24,4 @@ web/location-*.json
 # Config files
 config.json
 release_config.json
+userdata.js
