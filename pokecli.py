@@ -36,13 +36,15 @@ import random
 import ssl
 import logging
 import sys
+
 from pokemongo_bot import logger
 from pokemongo_bot import PokemonGoBot
+import colorama
 
 # Disable HTTPS certificate verification
 if sys.version_info >= (2, 7, 9):
     # pylint: disable=protected-access
-    ssl._create_default_https_context = ssl._create_unverified_context
+    ssl._create_default_https_context = ssl._create_unverified_context  # type: ignore
 
 
 def init_config():
@@ -95,7 +97,7 @@ def init_config():
     parser.add_argument(
         "-w",
         "--walk",
-        help=" Walk instead of teleport with given speed (meters per second max 4.16 because of walking end on 15km/h)",
+        help="Walk instead of teleport with given speed (meters per second max 4.16 because of walking end on 15km/h)",
         type=float,
         dest="walk")
     parser.add_argument(
@@ -200,7 +202,7 @@ def init_config():
         if config.__dict__.get(key) is None and default_config.get(key) is not None:
             config.__dict__[key] = default_config.get(key)
 
-    config.exclude_plugins = [plugin_name for plugin_name in config.exclude_plugins.split(",")]
+    config.exclude_plugins = config.exclude_plugins.split(",")
 
     print(config.__dict__)
 
@@ -224,6 +226,8 @@ def main():
     # log settings
     # log format
     # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+
+    colorama.init()
 
     config = init_config()
     if not config:
